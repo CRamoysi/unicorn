@@ -1,0 +1,20 @@
+name: unicorn
+version: 0.1.0
+publish_to: none
+
+description: >
+  Unicorn - Toolkit modulaire Dart/Flutter (U$) : extensions, utilitaires, logger, etc.
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  # Ajoutez ici les dépendances nécessaires
+
+dev_dependencies:
+  test: ^1.24.0
+  coverage: ^1.6.3
+
+# Pour Flutter, décommentez les lignes suivantes :
+# flutter:
+#   sdk: flutter
