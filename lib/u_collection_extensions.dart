@@ -59,6 +59,7 @@ extension U$ListRemoveExtensions<T> on List<T> {
   }
 
   List<T> removeCountWhereAndReturn(bool Function(T) test, int count) {
+    if (count < 0) throw ArgumentError('Count must be non-negative');
     final removed = <T>[];
     var foundCount = 0;
     removeWhere((element) {
@@ -90,8 +91,11 @@ extension U$ListIntersectionExtensions<T> on List<T> {
 // ===================== Set Extensions =====================
 extension U$SetRemoveExtensions<T> on Set<T> {
   Set<T> extractWhere(bool Function(T) test) {
-    final removed = where(test).toSet();
-    removeWhere(test);
+    final removed = <T>{};
+    for (final element in this) {
+      if (test(element)) removed.add(element);
+    }
+    removeAll(removed);
     return removed;
   }
 

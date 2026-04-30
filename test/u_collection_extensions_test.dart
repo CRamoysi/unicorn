@@ -42,6 +42,12 @@ void main() {
       expect(removed, [2, 2]);
       expect(list, [1, 2, 3]);
     });
+    test('removeCountWhereAndReturn rejects negative count', () {
+      expect(
+        () => [1, 2, 3].removeCountWhereAndReturn((e) => e.isEven, -1),
+        throwsArgumentError,
+      );
+    });
     test('intersection, difference, union', () {
       final a = [1, 2, 3];
       final b = [2, 3, 4];
@@ -57,6 +63,15 @@ void main() {
       final removed = set.extractWhere((e) => e.isEven);
       expect(removed, {2, 4});
       expect(set, {1, 3});
+    });
+    test('extractWhere evaluates predicate once per element', () {
+      final set = {1, 2, 3};
+      var calls = 0;
+      set.extractWhere((e) {
+        calls++;
+        return e.isOdd;
+      });
+      expect(calls, 3);
     });
     test('extractFirstWhere removes and returns first match', () {
       final set = {1, 2, 3};
