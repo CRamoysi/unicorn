@@ -26,12 +26,10 @@ extension U$ListRemoveExtensions<T> on List<T> {
   }
 
   T? firstWhereOrNull(bool Function(T) test) {
-    try {
-      if (isEmpty) return null;
-      return firstWhere(test);
-    } catch (_) {
-      return null;
+    for (final element in this) {
+      if (test(element)) return element;
     }
+    return null;
   }
 
   void sortBy<K extends Comparable<Object?>>(K Function(T) keyOf) {
@@ -108,15 +106,10 @@ extension U$SetRemoveExtensions<T> on Set<T> {
   }
 
   T? firstWhereOrNull(bool Function(T) test) {
-    try {
-      if (isEmpty) return null;
-      for (final element in this) {
-        if (test(element)) return element;
-      }
-      return null;
-    } catch (_) {
-      return null;
+    for (final element in this) {
+      if (test(element)) return element;
     }
+    return null;
   }
 }
 
@@ -145,11 +138,10 @@ extension U$MapRemoveExtensions<K, V> on Map<K, V> {
   }
 
   MapEntry<K, V>? firstWhereOrNull(bool Function(K key, V value) test) {
-    try {
-      return entries.firstWhere((entry) => test(entry.key, entry.value));
-    } catch (_) {
-      return null;
+    for (final entry in entries) {
+      if (test(entry.key, entry.value)) return entry;
     }
+    return null;
   }
 }
 
@@ -220,12 +212,10 @@ extension U$MapIntersectionExtensions<K, V> on Map<K, V> {
 // ===================== Iterable Extensions =====================
 extension U$IterableExtensions<T> on Iterable<T> {
   T? firstWhereOrNull(bool Function(T) test) {
-    try {
-      if (isEmpty) return null;
-      return firstWhere(test);
-    } catch (_) {
-      return null;
+    for (final element in this) {
+      if (test(element)) return element;
     }
+    return null;
   }
 
   List<T> sorted([int Function(T a, T b)? compare]) {
