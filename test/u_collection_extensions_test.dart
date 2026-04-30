@@ -81,12 +81,15 @@ void main() {
     test('extractFirstWhere removes and returns first match', () {
       final map = {1: 'a', 2: 'b', 3: 'c'};
       final removed = map.extractFirstWhere((k, v) => v == 'b');
-      expect(removed, MapEntry(2, 'b'));
+      expect(removed?.key, 2);
+      expect(removed?.value, 'b');
       expect(map, {1: 'a', 3: 'c'});
     });
     test('firstWhereOrNull returns first match or null', () {
       final map = {1: 'a', 2: 'b'};
-      expect(map.firstWhereOrNull((k, v) => v == 'b'), MapEntry(2, 'b'));
+      final found = map.firstWhereOrNull((k, v) => v == 'b');
+      expect(found?.key, 2);
+      expect(found?.value, 'b');
       expect(map.firstWhereOrNull((k, v) => v == 'z'), isNull);
     });
     test('intersection, difference, compare', () {
@@ -134,12 +137,22 @@ void main() {
     test('u\$groupBy groups by key', () {
       final list = ['a', 'ab', 'b', 'ba'];
       final grouped = u$groupBy(list, (s) => s.length);
-      expect(grouped, {1: ['a', 'b'], 2: ['ab', 'ba']});
+      expect(grouped, {
+        1: ['a', 'b'],
+        2: ['ab', 'ba']
+      });
     });
     test('u\$partition splits into chunks', () {
       final list = [1, 2, 3, 4, 5];
       final parts = u$partition(list, 2).toList();
-      expect(parts, [ [1, 2], [3, 4], [5] ]);
+      expect(parts, [
+        [1, 2],
+        [3, 4],
+        [5]
+      ]);
+    });
+    test('u\$partition rejects invalid chunk size', () {
+      expect(() => u$partition([1, 2, 3], 0), throwsArgumentError);
     });
   });
 }

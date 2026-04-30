@@ -82,8 +82,16 @@ extension U$ListRemoveExtensions<T> on List<T> {
 }
 
 extension U$ListIntersectionExtensions<T> on List<T> {
-  List<T> intersection(List<T> other) => where((element) => other.contains(element)).toList();
-  List<T> difference(List<T> other) => where((element) => !other.contains(element)).toList();
+  List<T> intersection(List<T> other) {
+    final otherSet = other.toSet();
+    return where((element) => otherSet.contains(element)).toList();
+  }
+
+  List<T> difference(List<T> other) {
+    final otherSet = other.toSet();
+    return where((element) => !otherSet.contains(element)).toList();
+  }
+
   List<T> union(List<T> other) => {...this, ...other}.toList();
 }
 
@@ -94,6 +102,7 @@ extension U$SetRemoveExtensions<T> on Set<T> {
     removeWhere(test);
     return removed;
   }
+
   T? extractFirstWhere(bool Function(T) test) {
     for (final element in this) {
       if (test(element)) {
@@ -103,6 +112,7 @@ extension U$SetRemoveExtensions<T> on Set<T> {
     }
     return null;
   }
+
   T? firstWhereOrNull(bool Function(T) test) {
     try {
       if (isEmpty) return null;
@@ -129,6 +139,7 @@ extension U$MapRemoveExtensions<K, V> on Map<K, V> {
     });
     return removed;
   }
+
   MapEntry<K, V>? extractFirstWhere(bool Function(K key, V value) test) {
     for (final entry in entries) {
       if (test(entry.key, entry.value)) {
@@ -138,6 +149,7 @@ extension U$MapRemoveExtensions<K, V> on Map<K, V> {
     }
     return null;
   }
+
   MapEntry<K, V>? firstWhereOrNull(bool Function(K key, V value) test) {
     try {
       return entries.firstWhere((entry) => test(entry.key, entry.value));
@@ -155,9 +167,13 @@ extension U$MapIntersectionExtensions<K, V> on Map<K, V> {
     });
     return result;
   }
-  Set<K> intersectionKeys(Map<K, V> other) => keys.toSet().intersection(other.keys.toSet());
-  Set<V> intersectionValues(Map<K, V> other) => values.toSet().intersection(other.values.toSet());
-  Map<K, ({V thisValue, V otherValue})> intersectionKeysWithValues(Map<K, V> other) {
+
+  Set<K> intersectionKeys(Map<K, V> other) =>
+      keys.toSet().intersection(other.keys.toSet());
+  Set<V> intersectionValues(Map<K, V> other) =>
+      values.toSet().intersection(other.values.toSet());
+  Map<K, ({V thisValue, V otherValue})> intersectionKeysWithValues(
+      Map<K, V> other) {
     final result = <K, ({V thisValue, V otherValue})>{};
     forEach((key, value) {
       if (other.containsKey(key)) {
@@ -166,6 +182,7 @@ extension U$MapIntersectionExtensions<K, V> on Map<K, V> {
     });
     return result;
   }
+
   Map<K, V> difference(Map<K, V> other) {
     final result = <K, V>{};
     forEach((key, value) {
@@ -173,6 +190,7 @@ extension U$MapIntersectionExtensions<K, V> on Map<K, V> {
     });
     return result;
   }
+
   ({
     Map<K, V> common,
     Map<K, V> onlyInThis,
@@ -189,7 +207,8 @@ extension U$MapIntersectionExtensions<K, V> on Map<K, V> {
         if (other[key] == value) {
           common[key] = value;
         } else {
-          differentValues[key] = (thisValue: value, otherValue: other[key] as V);
+          differentValues[key] =
+              (thisValue: value, otherValue: other[key] as V);
         }
       } else {
         onlyInThis[key] = value;
@@ -214,6 +233,7 @@ extension U$IterableExtensions<T> on Iterable<T> {
       return null;
     }
   }
+
   List<T> sorted([int Function(T a, T b)? compare]) {
     try {
       final list = toList();
@@ -236,6 +256,7 @@ extension U$IterableExtensions<T> on Iterable<T> {
       return <T>[];
     }
   }
+
   ({List<T> matching, List<T> nonMatching}) partition(bool Function(T) test) {
     final matching = <T>[];
     final nonMatching = <T>[];
@@ -248,6 +269,7 @@ extension U$IterableExtensions<T> on Iterable<T> {
     }
     return (matching: matching, nonMatching: nonMatching);
   }
+
   List<T> distinct([Object? Function(T)? by]) {
     try {
       if (isEmpty) return <T>[];
@@ -266,6 +288,7 @@ extension U$IterableExtensions<T> on Iterable<T> {
       return <T>[];
     }
   }
+
   Map<K, V> toMap<K, V>(MapEntry<K, V> Function(T) toEntry) {
     try {
       final result = <K, V>{};
@@ -285,7 +308,8 @@ extension U$IterableExtensions<T> on Iterable<T> {
 }
 
 // ===================== Fonctions globales =====================
-Map<K, List<T>> u$groupBy<T, K>(Iterable<T> iterable, K Function(T) keyFunction) {
+Map<K, List<T>> u$groupBy<T, K>(
+    Iterable<T> iterable, K Function(T) keyFunction) {
   try {
     final result = <K, List<T>>{};
     for (final element in iterable) {
@@ -303,19 +327,15 @@ Map<K, List<T>> u$groupBy<T, K>(Iterable<T> iterable, K Function(T) keyFunction)
 }
 
 Iterable<List<T>> u$partition<T>(Iterable<T> iterable, int size) {
-  try {
-    if (size <= 0) throw ArgumentError('Size must be positive');
-    final iterator = iterable.iterator;
-    final result = <List<T>>[];
-    while (iterator.moveNext()) {
-      final chunk = <T>[iterator.current];
-      for (var i = 1; i < size && iterator.moveNext(); i++) {
-        chunk.add(iterator.current);
-      }
-      result.add(chunk);
+  if (size <= 0) throw ArgumentError('Size must be positive');
+  final iterator = iterable.iterator;
+  final result = <List<T>>[];
+  while (iterator.moveNext()) {
+    final chunk = <T>[iterator.current];
+    for (var i = 1; i < size && iterator.moveNext(); i++) {
+      chunk.add(iterator.current);
     }
-    return result;
-  } catch (_) {
-    return <List<T>>[];
+    result.add(chunk);
   }
+  return result;
 }
