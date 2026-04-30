@@ -97,6 +97,12 @@ void main() {
       final b = {2: 'b', 3: 'z', 4: 'd'};
       expect(a.intersection(b), {2: 'b'});
       expect(a.difference(b), {1: 'a', 3: 'c'});
+      expect(a.intersectionKeys(b), {2, 3});
+      expect(a.intersectionValues(b), {'b'});
+      expect(a.intersectionKeysWithValues(b), {
+        2: (thisValue: 'b', otherValue: 'b'),
+        3: (thisValue: 'c', otherValue: 'z'),
+      });
       final cmp = a.compare(b);
       expect(cmp.common, {2: 'b'});
       expect(cmp.onlyInThis, {1: 'a'});

@@ -243,22 +243,14 @@ extension U$IterableExtensions<T> on Iterable<T> {
   }
 
   List<T> distinct([Object? Function(T)? by]) {
-    try {
-      if (isEmpty) return <T>[];
-      final seen = <Object?>{};
-      final result = <T>[];
-      for (final element in this) {
-        try {
-          final key = by != null ? by(element) : element;
-          if (seen.add(key)) result.add(element);
-        } catch (_) {
-          continue;
-        }
-      }
-      return result;
-    } catch (_) {
-      return <T>[];
+    if (isEmpty) return <T>[];
+    final seen = <Object?>{};
+    final result = <T>[];
+    for (final element in this) {
+      final key = by != null ? by(element) : element;
+      if (seen.add(key)) result.add(element);
     }
+    return result;
   }
 
   Map<K, V> toMap<K, V>(MapEntry<K, V> Function(T) toEntry) {
