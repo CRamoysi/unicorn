@@ -161,7 +161,7 @@ extension U$MapIntersectionExtensions<K, V> on Map<K, V> {
   Map<K, V> intersection(Map<K, V> other) {
     final result = <K, V>{};
     forEach((key, value) {
-      if (other[key] == value) result[key] = value;
+      if (other.containsKey(key) && other[key] == value) result[key] = value;
     });
     return result;
   }

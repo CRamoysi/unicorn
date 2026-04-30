@@ -124,6 +124,11 @@ void main() {
       expect(cmp.onlyInOther, {4: 'd'});
       expect(cmp.differentValues, {3: (thisValue: 'c', otherValue: 'z')});
     });
+    test('intersection does not match absent null values', () {
+      final a = <int, String?>{1: null, 2: 'b'};
+      final b = <int, String?>{2: 'b'};
+      expect(a.intersection(b), {2: 'b'});
+    });
   });
 
   group('U\$IterableExtensions', () {
