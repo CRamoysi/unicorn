@@ -152,6 +152,12 @@ void main() {
       final it = ['a', 'bb'];
       expect(it.toMap((e) => MapEntry(e, e.length)), {'a': 1, 'bb': 2});
     });
+    test('toMap propagates converter errors', () {
+      expect(
+        () => ['a'].toMap<String, int>((e) => throw StateError('boom')),
+        throwsStateError,
+      );
+    });
   });
 
   group('Global functions', () {
@@ -162,6 +168,12 @@ void main() {
         1: ['a', 'b'],
         2: ['ab', 'ba']
       });
+    });
+    test('u\$groupBy propagates key function errors', () {
+      expect(
+        () => u$groupBy(['a'], (e) => throw StateError('boom')),
+        throwsStateError,
+      );
     });
     test('u\$partition splits into chunks', () {
       final list = [1, 2, 3, 4, 5];

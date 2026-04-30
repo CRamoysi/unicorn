@@ -59,7 +59,9 @@ extension U$ListRemoveExtensions<T> on List<T> {
   }
 
   List<T> removeCountWhereAndReturn(bool Function(T) test, int count) {
-    if (count < 0) throw ArgumentError('Count must be non-negative');
+    if (count < 0) {
+      throw ArgumentError.value(count, 'count', 'Count must be non-negative');
+    }
     final removed = <T>[];
     var foundCount = 0;
     removeWhere((element) {
@@ -100,13 +102,17 @@ extension U$SetRemoveExtensions<T> on Set<T> {
   }
 
   T? extractFirstWhere(bool Function(T) test) {
+    var found = false;
+    T? matched;
     for (final element in this) {
       if (test(element)) {
-        remove(element);
-        return element;
+        found = true;
+        matched = element;
+        break;
       }
     }
-    return null;
+    if (found) remove(matched);
+    return matched;
   }
 
   T? firstWhereOrNull(bool Function(T) test) {
@@ -132,13 +138,15 @@ extension U$MapRemoveExtensions<K, V> on Map<K, V> {
   }
 
   MapEntry<K, V>? extractFirstWhere(bool Function(K key, V value) test) {
+    MapEntry<K, V>? matchedEntry;
     for (final entry in entries) {
       if (test(entry.key, entry.value)) {
-        remove(entry.key);
-        return entry;
+        matchedEntry = entry;
+        break;
       }
     }
-    return null;
+    if (matchedEntry != null) remove(matchedEntry.key);
+    return matchedEntry;
   }
 
   MapEntry<K, V>? firstWhereOrNull(bool Function(K key, V value) test) {
@@ -258,44 +266,30 @@ extension U$IterableExtensions<T> on Iterable<T> {
   }
 
   Map<K, V> toMap<K, V>(MapEntry<K, V> Function(T) toEntry) {
-    try {
-      final result = <K, V>{};
-      for (final element in this) {
-        try {
-          final entry = toEntry(element);
-          result[entry.key] = entry.value;
-        } catch (_) {
-          continue;
-        }
-      }
-      return result;
-    } catch (_) {
-      return <K, V>{};
+    final result = <K, V>{};
+    for (final element in this) {
+      final entry = toEntry(element);
+      result[entry.key] = entry.value;
     }
+    return result;
   }
 }
 
 // ===================== Fonctions globales =====================
 Map<K, List<T>> u$groupBy<T, K>(
     Iterable<T> iterable, K Function(T) keyFunction) {
-  try {
-    final result = <K, List<T>>{};
-    for (final element in iterable) {
-      try {
-        final key = keyFunction(element);
-        result.putIfAbsent(key, () => <T>[]).add(element);
-      } catch (_) {
-        continue;
-      }
-    }
-    return result;
-  } catch (_) {
-    return <K, List<T>>{};
+  final result = <K, List<T>>{};
+  for (final element in iterable) {
+    final key = keyFunction(element);
+    result.putIfAbsent(key, () => <T>[]).add(element);
   }
+  return result;
 }
 
 List<List<T>> u$partition<T>(Iterable<T> iterable, int size) {
-  if (size <= 0) throw ArgumentError('Size must be positive');
+  if (size <= 0) {
+    throw ArgumentError.value(size, 'size', 'Size must be positive');
+  }
   final iterator = iterable.iterator;
   final result = <List<T>>[];
   while (iterator.moveNext()) {
