@@ -3,7 +3,7 @@
 
 import 'dart:io';
 
-void main(List<String> args) async {
+Future<void> main(List<String> _) async {
   final result = await Process.run(
     'dart',
     ['test', '--coverage=coverage'],

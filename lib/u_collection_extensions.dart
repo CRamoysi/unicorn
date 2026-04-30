@@ -35,18 +35,12 @@ extension U$ListRemoveExtensions<T> on List<T> {
   }
 
   void sortBy<K extends Comparable<Object?>>(K Function(T) keyOf) {
-    try {
-      if (isEmpty) return;
-      sort((a, b) {
-        try {
-          final keyA = keyOf(a);
-          final keyB = keyOf(b);
-          return keyA.compareTo(keyB);
-        } catch (_) {
-          return 0;
-        }
-      });
-    } catch (_) {}
+    if (isEmpty) return;
+    sort((a, b) {
+      final keyA = keyOf(a);
+      final keyB = keyOf(b);
+      return keyA.compareTo(keyB);
+    });
   }
 
   bool equals(List<T> other) {
@@ -235,26 +229,14 @@ extension U$IterableExtensions<T> on Iterable<T> {
   }
 
   List<T> sorted([int Function(T a, T b)? compare]) {
-    try {
-      final list = toList();
-      if (list.isEmpty) return list;
-      if (compare != null) {
-        list.sort((a, b) {
-          try {
-            return compare(a, b);
-          } catch (_) {
-            return 0;
-          }
-        });
-      } else {
-        try {
-          list.sort();
-        } catch (_) {}
-      }
-      return list;
-    } catch (_) {
-      return <T>[];
+    final list = toList();
+    if (list.isEmpty) return list;
+    if (compare != null) {
+      list.sort(compare);
+    } else {
+      list.sort();
     }
+    return list;
   }
 
   ({List<T> matching, List<T> nonMatching}) partition(bool Function(T) test) {
@@ -326,7 +308,7 @@ Map<K, List<T>> u$groupBy<T, K>(
   }
 }
 
-Iterable<List<T>> u$partition<T>(Iterable<T> iterable, int size) {
+List<List<T>> u$partition<T>(Iterable<T> iterable, int size) {
   if (size <= 0) throw ArgumentError('Size must be positive');
   final iterator = iterable.iterator;
   final result = <List<T>>[];
