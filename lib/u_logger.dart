@@ -1,11 +1,14 @@
-/// U$Logger: Un logger simple et modulaire pour Unicorn.
-/// Utilisation : U$Logger.log('message');
+// ignore_for_file: non_constant_identifier_names
 
-class U$Logger {
-  /// Affiche un message dans la console avec un préfixe [U$].
-  static void log(Object? message) {
-    final now = DateTime.now().toIso8601String();
-    // ignore: avoid_print
-    print('[U\$][$now] $message');
+part of 'unicorn.dart';
+
+void U$Text(
+  String text,
+) {
+  if (!U$.canDebug) {
+    return;
   }
+
+  final timestamp = DateTime.now().toIso8601String();
+  debugPrint('${U$.unicornIcon} $timestamp - $text');
 }
