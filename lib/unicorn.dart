@@ -1,10 +1,16 @@
 /// Unicorn Toolkit - Point d'entrée
-/// Exporte tous les outils Unicorn
+import 'dart:developer' as dev;
 
-export 'u_logger.dart';
-export 'u_collection_extensions.dart';
+
+/// Exporte tous les outils Unicorn
+part 'unicorn_logger.dart';
+part 'unicorn_collection.dart';
+part 'unicorn_type.dart';
 
 /// Utilitaire Unicorn
+const bool kReleaseMode = bool.fromEnvironment('dart.vm.product');
+const bool kProfileMode = bool.fromEnvironment('dart.vm.profile');
+const bool kDebugMode = !kReleaseMode && !kProfileMode;
 
 class U$ {
   //singleton
@@ -21,6 +27,6 @@ class U$ {
 
   // Flag mode debug
   static bool get isDebug => kDebugMode;
-  static const bool forceDebug = false; // Toujours commit à false
+  static bool forceDebug = false; // Toujours commit à false
   static bool get canDebug => isDebug || forceDebug;
 }

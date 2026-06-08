@@ -1,3 +1,5 @@
+part of 'unicorn.dart';
+
 extension UnicornMapExtension<K, V> on Map<K, V>? {
   T? getV<T>(
     K key, [

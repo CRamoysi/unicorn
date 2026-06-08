@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:unicorn/u_collection_extensions.dart';
+import 'package:unicorn/unicorn.dart';
 
 void main() {
   group('U\$ListRemoveExtensions', () {
