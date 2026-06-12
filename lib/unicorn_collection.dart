@@ -1,8 +1,6 @@
 /// U$CollectionExtensions : Extensions génériques pour List, Set, Map, Iterable.
 /// Fournit des méthodes utilitaires avancées pour manipuler les collections.
 
-part of 'unicorn.dart';
-
 // ===================== List Extensions =====================
 extension U$ListRemoveExtensions<T> on List<T> {
   List<T> extractWhere(bool Function(T) test) {

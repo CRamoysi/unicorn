@@ -1,11 +1,11 @@
 /// Unicorn Toolkit - Point d'entrée
-import 'dart:developer' as dev;
-
 
 /// Exporte tous les outils Unicorn
-part 'unicorn_logger.dart';
-part 'unicorn_collection.dart';
-part 'unicorn_type.dart';
+export 'unicorn_logger.dart';
+// Extensions pour les collections
+export 'unicorn_collection.dart';
+// Types et extensions de parsing
+export 'unicorn_type.dart';
 
 /// Utilitaire Unicorn
 const bool kReleaseMode = bool.fromEnvironment('dart.vm.product');

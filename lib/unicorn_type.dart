@@ -1,67 +1,23 @@
-part of 'unicorn.dart';
+export 'unicorn_type/unicorn_type_bool.dart';
+export 'unicorn_type/unicorn_type_iterable.dart';
+export 'unicorn_type/unicorn_type_num.dart';
+export 'unicorn_type/unicorn_type_string.dart';
 
-extension UnicornMapExtension<K, V> on Map<K, V>? {
-  T? getV<T>(
-    K key, [
-    Map<Type, dynamic>? customCases,
-  ]) {
-    if (this?.isNotEmpty != true) {
-      return (null).tryParse<T>(
-        customCases: customCases,
-      );
-    }
 
-    final value = this![key];
-    if (value is T) {
-      return value;
-    }
-
-    return value.tryParse<T>(
-      customCases: customCases,
-    );
-  }
-}
-
-extension UnicornIterableExtension<T> on Iterable<T?>? {
-  Iterable<T> get whereNotNull {
-    if (this == null) return const Iterable.empty();
-    return this!.whereType<T>();
-  }
-}
-
-extension UnicornNullableExtension<T> on T? {
+extension UnicornNullableExtension<T> on T?{
   T or(T fallback) => this ?? fallback;
+  T? orNull(T fallback) => this ?? fallback;
+  T get orFalse => throw ArgumentError('orFalse is only available for bool?');
+  T get orTrue => throw ArgumentError('orTrue is only available for bool?');
 }
 
-extension UnicornBoolExtension on bool? {
-  bool get orFalse => this ?? false;
-  bool get orTrue => this ?? true;
+extension UnicornOnNullExtension on Null{
+  T or<T>(T fallback) => fallback;
+  T? orNull<T>(T fallback) => fallback;
+  bool get orFalse => false;
+  bool get orTrue => true;
 }
 
-extension UnicornIntExtension on int? {
-  int get orZero => this ?? 0;
-}
-
-extension UnicornDoubleExtension on double? {
-  double get orZero => this ?? 0.0;
-}
-
-extension UnicornStringExtension on String? {
-  String? get trimOrNull {
-    if (this == null) return null;
-    final trimmed = this!.trim();
-    return trimmed.isEmpty ? null : trimmed;
-  }
-
-  String get trim => this?.trim() ?? '';
-}
-
-extension UnicornListStringExtension on List<String>? {
-  List<String> get cleanAndTrim {
-    if (this == null) return const [];
-    return this!.map((e) => e.trimOrNull).whereNotNull.toList(growable: false);
-  }
-}
 
 extension UnicornTypeExtension on Object? {
   /// Parse la valeur courante vers le type cible T.
