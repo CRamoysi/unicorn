@@ -1,7 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 import 'dart:developer' as dev;
 
-import 'package:unicorn/unicorn.dart';
+import 'package:unicorn/unicorn_core.dart';
 
 void U$Log(
   String? text,{

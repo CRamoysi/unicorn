@@ -1,5 +1,5 @@
 
-import 'package:unicorn/unicorn.dart';
+import 'package:unicorn/unicorn_type/unicorn_type_parse.dart';
 
 extension UnicornMapExtension<K, V> on Map<K, V>? {
   T? getV<T>(
