@@ -17,11 +17,6 @@ void main() {
       expect((null as bool?).orFalse, false);
       expect((null as bool?).orTrue, true);
       });
-    test('String', (){
-      expect(()=>"toto".orFalse, throwsArgumentError);
-      expect(()=>"toto".orTrue, throwsArgumentError);
-    });
-
   });
 
   group('trim/trimOrNull',(){

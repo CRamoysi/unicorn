@@ -1,7 +1,5 @@
 import 'package:test/test.dart';
 import 'package:unicorn/unicorn.dart';
-import 'package:unicorn/unicorn_type/unicorn_type_iterable/unicorn_type_iterable_list.dart';
-import 'package:unicorn/unicorn_type/unicorn_type_iterable/unicorn_type_iterable_map.dart';
 
 void main() {
 	group('UnicornIterableExtension.whereNotNull', () {

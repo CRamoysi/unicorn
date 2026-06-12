@@ -1,4 +1,15 @@
 extension UnicornTypeExtension on Object? {
+  /// Parse la valeur courante vers le type cible T.
+  ///
+  /// Priorite de resolution:
+  /// 1) valeur deja du type T
+  /// 2) custom case associe au type runtime exact de la valeur
+  /// 3) conversions natives (int, double, String, List<String>, DateTime, bool)
+  /// 4) fallback customCases[Object]
+  ///
+  /// Cas speciaux de customCases:
+  /// - Null: fallback dedie quand la valeur source est null
+  /// - Object: fallback global quand rien d'autre ne matche
   T? tryParse<T>({
     Map<Type, dynamic>? customCases,
   }) {
