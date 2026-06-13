@@ -1,4 +1,3 @@
-
 extension UnicornStringNullableExtension on String? {
   String? get trimOrNull {
     if (this == null) return null;
@@ -8,6 +7,8 @@ extension UnicornStringNullableExtension on String? {
 
   String trim() => this?.trim() ?? '';
 
+  bool get isNullOrEmpty => this == null || this!.isEmpty;
+  bool get isNotNullOrEmpty => this != null && this!.isNotEmpty;
 }
 
 extension UnicornStringExtension on String {
@@ -16,6 +17,6 @@ extension UnicornStringExtension on String {
     return trimmed.isEmpty ? null : trimmed;
   }
 
-
-
+  bool get isNullOrEmpty => this.isEmpty;
+  bool get isNotNullOrEmpty => this.isNotEmpty;
 }
