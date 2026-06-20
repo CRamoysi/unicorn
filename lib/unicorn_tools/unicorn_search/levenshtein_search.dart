@@ -142,13 +142,6 @@ class U$PreparedLevenshteinIndex<T> {
       _itemsByLength
           .putIfAbsent(term.length, () => <_U$PreparedLevenshteinItem<T>>[])
           .add(prepared);
-
-      final wordLengths = words.map((word) => word.length).toSet();
-      for (final length in wordLengths) {
-        _itemsByWordLength
-            .putIfAbsent(length, () => <_U$PreparedLevenshteinItem<T>>[])
-            .add(prepared);
-      }
     }
   }
 
@@ -158,8 +151,20 @@ class U$PreparedLevenshteinIndex<T> {
       <_U$PreparedLevenshteinItem<T>>[];
   final Map<int, List<_U$PreparedLevenshteinItem<T>>> _itemsByLength =
       <int, List<_U$PreparedLevenshteinItem<T>>>{};
-  final Map<int, List<_U$PreparedLevenshteinItem<T>>> _itemsByWordLength =
-      <int, List<_U$PreparedLevenshteinItem<T>>>{};
+
+  // Construit à la demande : inutilisé pour fuzzy=true et matchScope=chain.
+  Map<int, List<_U$PreparedLevenshteinItem<T>>>? _wordLengthIndex;
+
+  Map<int, List<_U$PreparedLevenshteinItem<T>>> _getWordLengthIndex() {
+    if (_wordLengthIndex != null) return _wordLengthIndex!;
+    final index = <int, List<_U$PreparedLevenshteinItem<T>>>{};
+    for (final prepared in _items) {
+      for (final len in prepared.words.map((w) => w.length).toSet()) {
+        index.putIfAbsent(len, () => <_U$PreparedLevenshteinItem<T>>[]).add(prepared);
+      }
+    }
+    return _wordLengthIndex = index;
+  }
 
   /// Nombre d'éléments indexés.
   int get size => _items.length;
@@ -189,7 +194,7 @@ class U$PreparedLevenshteinIndex<T> {
     U$PreparedLevenshteinTerm preparedQuery, {
     U$LevenshteinSearchOptions options = const U$LevenshteinSearchOptions(),
   }) {
-    if (_items.isEmpty || options.maxResults <= 0) {
+    if (_items.isEmpty || options.maxResults <= 0 || preparedQuery.length == 0) {
       return <U$LevenshteinMatch<T>>[];
     }
 
@@ -262,19 +267,24 @@ class U$PreparedLevenshteinIndex<T> {
     final maxLen = queryLength + maxLengthDelta;
 
     if (matchScope == U$LevenshteinMatchScope.words) {
-      if (fuzzy) {
-        // En mode fuzzy, un mot plus long que la query peut matcher sur son
-        // préfixe — pas de borne supérieure possible sur la longueur du mot.
-        yield* _items;
-        return;
-      }
+      final index = _getWordLengthIndex();
       final yielded = <_U$PreparedLevenshteinItem<T>>{};
-      for (var len = minLen; len <= maxLen; len++) {
-        final bucket = _itemsByWordLength[len];
-        if (bucket == null) continue;
-        for (final item in bucket) {
-          if (yielded.add(item)) {
-            yield item;
+      if (fuzzy) {
+        // Pas de borne supérieure : un mot plus long peut matcher en préfixe.
+        // La borne inférieure reste valide : un mot plus court que queryLength
+        // ne peut pas avoir de préfixe de longueur queryLength.
+        for (final entry in index.entries) {
+          if (entry.key < minLen) continue;
+          for (final item in entry.value) {
+            if (yielded.add(item)) yield item;
+          }
+        }
+      } else {
+        for (var len = minLen; len <= maxLen; len++) {
+          final bucket = index[len];
+          if (bucket == null) continue;
+          for (final item in bucket) {
+            if (yielded.add(item)) yield item;
           }
         }
       }

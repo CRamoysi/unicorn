@@ -147,6 +147,25 @@ void main() {
       expect(results.map((r) => r.item), containsAll(['cat', 'catalog']));
     });
 
+    test('query vide retourne toujours une liste vide', () {
+      final index = U$PreparedLevenshteinIndex<String>(
+        source: const ['panther', 'catalog'],
+        valueOf: (item) => item,
+      );
+
+      expect(index.search(''), isEmpty);
+      expect(
+        index.search(
+          '   ',
+          options: const U$LevenshteinSearchOptions(
+            matchScope: U$LevenshteinMatchScope.words,
+            fuzzy: true,
+          ),
+        ),
+        isEmpty,
+      );
+    });
+
     test('fuzzy words matche un préfixe avec typo sur un mot plus long', () {
       final index = U$PreparedLevenshteinIndex<String>(
         source: const ['catalog'],
