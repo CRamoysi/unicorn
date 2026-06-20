@@ -129,5 +129,66 @@ void main() {
 
       expect(results, isEmpty);
     });
+
+    test('fuzzy words matche un préfixe sur un mot plus long que la query', () {
+      final index = U$PreparedLevenshteinIndex<String>(
+        source: const ['catalog', 'cat'],
+        valueOf: (item) => item,
+      );
+
+      final results = index.search(
+        'cat',
+        options: const U$LevenshteinSearchOptions(
+          maxDistance: 1,
+          matchScope: U$LevenshteinMatchScope.words,
+        ),
+      );
+
+      expect(results.map((r) => r.item), containsAll(['cat', 'catalog']));
+    });
+
+    test('fuzzy words matche un préfixe avec typo sur un mot plus long', () {
+      final index = U$PreparedLevenshteinIndex<String>(
+        source: const ['catalog'],
+        valueOf: (item) => item,
+      );
+
+      final results = index.search(
+        'cataog',
+        options: const U$LevenshteinSearchOptions(
+          maxDistance: 1,
+          matchScope: U$LevenshteinMatchScope.words,
+        ),
+      );
+
+      expect(results, isNotEmpty);
+      expect(results.first.item, 'catalog');
+    });
+  });
+
+  group(r'u$levenshteinSimilarity', () {
+    test('retourne 1.0 pour deux chaînes identiques', () {
+      expect(u$levenshteinSimilarity('bonjour', 'bonjour'), 1.0);
+    });
+
+    test('retourne 0.0 pour deux chaînes sans rapport', () {
+      expect(u$levenshteinSimilarity('abc', 'xyz'), 0.0);
+    });
+
+    test('retourne une valeur intermédiaire', () {
+      final s = u$levenshteinSimilarity('bonjour', 'bonjor');
+      expect(s, greaterThan(0.0));
+      expect(s, lessThan(1.0));
+    });
+
+    test('ne dépasse pas [0..1] quand maxDistance est dépassé', () {
+      final s = u$levenshteinSimilarity('abc', 'xyz', maxDistance: 1);
+      expect(s, inInclusiveRange(0.0, 1.0));
+      expect(s, 0.0);
+    });
+
+    test('retourne 1.0 pour deux chaînes vides', () {
+      expect(u$levenshteinSimilarity('', ''), 1.0);
+    });
   });
 }

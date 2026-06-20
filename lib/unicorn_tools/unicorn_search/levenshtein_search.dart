@@ -79,7 +79,7 @@ class U$PreparedLevenshteinTerm {
   /// Valeur normalisée selon [U$LevenshteinNormalizeOptions].
   final String normalized;
 
-  /// Liste de code points UTF-16 normalisés utilisée pour les calculs.
+  /// Liste de scalaires Unicode normalisés utilisée pour les calculs.
   final List<int> runes;
 
   /// Longueur de la version normalisée.
@@ -182,6 +182,8 @@ class U$PreparedLevenshteinIndex<T> {
 
   /// Recherche à partir d'une requête déjà préparée.
   ///
+  /// [preparedQuery] doit être construit via [prepareQuery] pour garantir
+  /// que la normalisation correspond à celle de cet index.
   /// Pratique pour les interfaces qui recalculent souvent sur les mêmes entrées.
   List<U$LevenshteinMatch<T>> searchPrepared(
     U$PreparedLevenshteinTerm preparedQuery, {
@@ -198,6 +200,7 @@ class U$PreparedLevenshteinIndex<T> {
       queryLength: preparedQuery.length,
       maxLengthDelta: maxLengthDelta,
       matchScope: options.matchScope,
+      fuzzy: options.fuzzy,
     );
 
     final matches = <U$LevenshteinMatch<T>>[];
@@ -248,6 +251,7 @@ class U$PreparedLevenshteinIndex<T> {
     required int queryLength,
     required int? maxLengthDelta,
     required U$LevenshteinMatchScope matchScope,
+    required bool fuzzy,
   }) sync* {
     if (maxLengthDelta == null) {
       yield* _items;
@@ -258,6 +262,12 @@ class U$PreparedLevenshteinIndex<T> {
     final maxLen = queryLength + maxLengthDelta;
 
     if (matchScope == U$LevenshteinMatchScope.words) {
+      if (fuzzy) {
+        // En mode fuzzy, un mot plus long que la query peut matcher sur son
+        // préfixe — pas de borne supérieure possible sur la longueur du mot.
+        yield* _items;
+        return;
+      }
       final yielded = <_U$PreparedLevenshteinItem<T>>{};
       for (var len = minLen; len <= maxLen; len++) {
         final bucket = _itemsByWordLength[len];
@@ -287,6 +297,8 @@ class U$PreparedLevenshteinIndex<T> {
     final values =
         term.normalized.split(' ').where((word) => word.isNotEmpty).toSet();
 
+    // Les tokens viennent de term.normalized, déjà entièrement normalisé.
+    // On désactive toute re-normalisation pour éviter un double traitement.
     return values
         .map((value) => U$PreparedLevenshteinTerm.fromString(
               value,
@@ -335,13 +347,14 @@ class U$PreparedLevenshteinIndex<T> {
       );
       var wordBestLength = word.length;
 
-      // Pour les recherches mot-par-mot, on compare aussi la query au préfixe
-      // des mots plus longs afin de mieux supporter les débuts de mots typo.
+      // Compare la query au préfixe des mots plus longs (débuts de mots avec
+      // typo). Asymétrique par conception : on cherche le début d'un mot, pas
+      // l'inverse.
       if (fuzzy && word.length > preparedQuery.length) {
-        final prefixDistance = u$levenshteinDistancePrepared(
-          preparedQuery.runes,
-          word.runes.sublist(0, preparedQuery.length),
-          maxDistance: maxDistance,
+        final prefixDistance = _levenshteinDP(
+          preparedQuery.runes, preparedQuery.length,
+          word.runes, preparedQuery.length,
+          maxDistance,
         );
         if (prefixDistance < wordBestDistance) {
           wordBestDistance = prefixDistance;
@@ -413,10 +426,16 @@ int u$levenshteinDistancePrepared(
   int? maxDistance,
 }) {
   if (identical(a, b)) return 0;
+  return _levenshteinDP(a, a.length, b, b.length, maxDistance);
+}
 
-  final lenA = a.length;
-  final lenB = b.length;
-
+int _levenshteinDP(
+  List<int> a,
+  int lenA,
+  List<int> b,
+  int lenB,
+  int? maxDistance,
+) {
   if (lenA == 0) return lenB;
   if (lenB == 0) return lenA;
 
@@ -426,7 +445,7 @@ int u$levenshteinDistancePrepared(
   }
 
   if (lenA > lenB) {
-    return u$levenshteinDistancePrepared(b, a, maxDistance: maxDistance);
+    return _levenshteinDP(b, lenB, a, lenA, maxDistance);
   }
 
   var previous = List<int>.generate(lenA + 1, (i) => i, growable: false);
@@ -466,6 +485,8 @@ int u$levenshteinDistancePrepared(
 /// Similarité de Levenshtein normalisée entre 0 et 1.
 ///
 /// `1.0` signifie identité parfaite, `0.0` une forte dissimilarité.
+///
+/// Si [maxDistance] est défini et dépassé, retourne `0.0`.
 double u$levenshteinSimilarity(
   String a,
   String b, {
@@ -484,5 +505,6 @@ double u$levenshteinSimilarity(
     maxDistance: maxDistance,
   );
 
-  return 1 - (distance / maxLen);
+  if (maxDistance != null && distance > maxDistance) return 0.0;
+  return 1.0 - distance / maxLen;
 }
