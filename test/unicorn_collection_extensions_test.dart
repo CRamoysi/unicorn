@@ -31,6 +31,16 @@ void main() {
       list.sortBy((s) => s.length);
       expect(list, ['pear', 'apple', 'banana']);
     });
+    test('sortBy descending trie en ordre décroissant', () {
+      final list = ['apple', 'pear', 'banana'];
+      list.sortBy((s) => s.length, descending: true);
+      expect(list, ['banana', 'apple', 'pear']);
+    });
+    test('sortBy sans descending reste croissant', () {
+      final list = [3, 1, 2];
+      list.sortBy((n) => n);
+      expect(list, [1, 2, 3]);
+    });
     test('equals compares lists', () {
       expect([1, 2, 3].equals([1, 2, 3]), isTrue);
       expect([1, 2, 3].equals([3, 2, 1]), isFalse);
@@ -208,17 +218,4 @@ void main() {
     });
   });
 
-  group('sortBy descending', () {
-    test('sortBy descending trie en ordre décroissant', () {
-      final list = ['apple', 'pear', 'banana'];
-      list.sortBy((s) => s.length, descending: true);
-      expect(list, ['banana', 'apple', 'pear']);
-    });
-
-    test('sortBy sans descending reste croissant', () {
-      final list = [3, 1, 2];
-      list.sortBy((n) => n);
-      expect(list, [1, 2, 3]);
-    });
-  });
 }

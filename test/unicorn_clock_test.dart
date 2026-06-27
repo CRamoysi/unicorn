@@ -5,6 +5,8 @@ import 'package:unicorn/unicorn.dart';
 
 void main() {
   group('U\$Clock', () {
+    setUp(() => U$Clock().clear());
+
     test('measures elapsed duration after start/stop', () async {
       final clock = U$Clock();
       const name = 'basic';
@@ -116,13 +118,18 @@ void main() {
   });
 
   group('U\$', () {
-    test('canDebug reflète forceDebug', () {
+    tearDown(() => U$.forceDebug = false);
+
+    test('forceDebug est modifiable en lecture-écriture', () {
       U$.forceDebug = true;
       expect(U$.forceDebug, isTrue);
-      expect(U$.canDebug, isTrue);
-
       U$.forceDebug = false;
       expect(U$.forceDebug, isFalse);
+    });
+
+    test('canDebug est vrai quand forceDebug est vrai', () {
+      U$.forceDebug = true;
+      expect(U$.canDebug, isTrue);
     });
   });
 
