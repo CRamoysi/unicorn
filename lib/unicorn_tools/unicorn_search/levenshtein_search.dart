@@ -32,6 +32,7 @@ class U$LevenshteinSearchOptions {
     this.maxLengthDelta,
     this.matchScope = U$LevenshteinMatchScope.chain,
     this.fuzzy = true,
+    this.minSimilarity,
   });
 
   /// Distance maximale acceptable.
@@ -51,6 +52,11 @@ class U$LevenshteinSearchOptions {
 
   /// Active les règles de matching fuzzy supplémentaires.
   final bool fuzzy;
+
+  /// Similarité minimale acceptable dans [0..1].
+  /// Filtre les résultats dont la similarité est inférieure à ce seuil.
+  /// Si null, aucun filtrage par similarité n'est appliqué.
+  final double? minSimilarity;
 }
 
 /// Représente une chaîne déjà normalisée et tokenisée pour accélérer les calculs.
@@ -225,6 +231,10 @@ class U$PreparedLevenshteinIndex<T> {
 
       final maxLen = math.max(preparedQuery.length, comparison.comparedLength);
       final similarity = maxLen == 0 ? 1.0 : 1 - (distance / maxLen);
+
+      if (options.minSimilarity != null && similarity < options.minSimilarity!) {
+        continue;
+      }
 
       matches.add(
         U$LevenshteinMatch<T>(

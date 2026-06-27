@@ -210,4 +210,40 @@ void main() {
       expect(u$levenshteinSimilarity('', ''), 1.0);
     });
   });
+
+  group('minSimilarity', () {
+    late U$PreparedLevenshteinIndex<String> index;
+
+    setUp(() {
+      index = U$PreparedLevenshteinIndex<String>(
+        source: const ['bonjour', 'bonsoir', 'salut', 'allo'],
+        valueOf: (item) => item,
+      );
+    });
+
+    test('filtre les résultats sous le seuil de similarité', () {
+      final results = index.search(
+        'bonjour',
+        options: const U$LevenshteinSearchOptions(minSimilarity: 0.9),
+      );
+      expect(results, isNotEmpty);
+      for (final r in results) {
+        expect(r.similarity, greaterThanOrEqualTo(0.9));
+      }
+    });
+
+    test('retourne vide si aucun résultat ne dépasse le seuil', () {
+      final results = index.search(
+        'bonjour',
+        options: const U$LevenshteinSearchOptions(minSimilarity: 1.0),
+      );
+      expect(results.length, 1);
+      expect(results.first.item, 'bonjour');
+    });
+
+    test('sans minSimilarity retourne tous les candidats valides', () {
+      final results = index.search('bonjour');
+      expect(results.length, greaterThan(1));
+    });
+  });
 }

@@ -5,6 +5,8 @@ import 'package:unicorn/unicorn.dart';
 
 void main() {
   group('U\$Clock', () {
+    setUp(() => U$Clock().clear());
+
     test('measures elapsed duration after start/stop', () async {
       final clock = U$Clock();
       const name = 'basic';
@@ -58,6 +60,90 @@ void main() {
 
       expect(first.inMicroseconds, greaterThan(0));
       expect(second.inMicroseconds, greaterThan(0));
+    });
+
+    test('show lance StateError si le chrono tourne encore', () {
+      final clock = U$Clock();
+      const name = 'show-running';
+
+      clock.start(name);
+      expect(() => clock.show(name), throwsStateError);
+      clock.stop(name);
+    });
+
+    test('show lance StateError si le chrono est inconnu', () {
+      final clock = U$Clock();
+      expect(() => clock.show('inconnu'), throwsStateError);
+    });
+
+    test('elapsed retourne la durée en cours sans stopper', () async {
+      final clock = U$Clock();
+      const name = 'elapsed-test';
+
+      clock.start(name);
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      final d = clock.elapsed(name);
+      expect(d.inMicroseconds, greaterThan(0));
+      clock.stop(name);
+    });
+
+    test('elapsed lance StateError si le chrono nest pas lancé', () {
+      final clock = U$Clock();
+      expect(() => clock.elapsed('inexistant'), throwsStateError);
+    });
+
+    test('remove supprime le chrono et rend getDuration impossible', () {
+      final clock = U$Clock();
+      const name = 'a-supprimer';
+
+      clock.start(name);
+      clock.stop(name);
+      clock.remove(name);
+
+      expect(() => clock.getDuration(name), throwsStateError);
+    });
+
+    test('clear supprime tous les chronos', () {
+      final clock = U$Clock();
+      clock.start('x');
+      clock.stop('x');
+      clock.start('y');
+      clock.stop('y');
+
+      clock.clear();
+
+      expect(() => clock.getDuration('x'), throwsStateError);
+      expect(() => clock.getDuration('y'), throwsStateError);
+    });
+  });
+
+  group('U\$', () {
+    tearDown(() => U$.forceDebug = false);
+
+    test('forceDebug est modifiable en lecture-écriture', () {
+      U$.forceDebug = true;
+      expect(U$.forceDebug, isTrue);
+      U$.forceDebug = false;
+      expect(U$.forceDebug, isFalse);
+    });
+
+    test('canDebug est vrai quand forceDebug est vrai', () {
+      U$.forceDebug = true;
+      expect(U$.canDebug, isTrue);
+    });
+  });
+
+  group('U\$Log', () {
+    test('ne lance pas d\'exception', () {
+      // ignore: avoid_print
+      expect(() => U$Log('message de test'), returnsNormally);
+    });
+
+    test('accepte error et stackTrace sans exception', () {
+      expect(
+        () => U$Log('erreur', error: Exception('oops'), stackTrace: StackTrace.current),
+        returnsNormally,
+      );
     });
   });
 }
