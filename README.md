@@ -21,9 +21,41 @@ L'import principal expose:
 
 - `unicorn_core.dart`
 - `unicorn_logger.dart`
+- `unicorn_clock.dart`
 - `unicorn_collection.dart`
 - `unicorn_type.dart`
 - `unicorn_tools/unicorn_search/levenshtein_search.dart`
+
+## Chrono (U$Clock)
+
+`U$Clock` est un singleton leger pour mesurer des durees nommees.
+
+### API disponible
+
+- `U$Clock().start(name, {reset = true})`
+- `U$Clock().stop(name)`
+- `U$Clock().getDuration(name)`
+- `U$Clock().show(name)`
+
+### Exemple rapide
+
+```dart
+final clock = U$Clock();
+
+clock.start('import-job');
+// ... votre traitement ...
+clock.stop('import-job');
+
+final elapsed = clock.getDuration('import-job');
+print('Temps ecoule: $elapsed');
+```
+
+### Comportement important
+
+- `start(name, reset: true)` recree le chrono du meme nom.
+- `start(name, reset: false)` leve une erreur si le chrono tourne deja.
+- `stop(name)` leve une erreur si le chrono n'est pas en cours.
+- `getDuration(name)` et `show(name)` levent une erreur si le chrono tourne encore.
 
 ## Recherche Levenshtein
 
