@@ -21,9 +21,69 @@ L'import principal expose:
 
 - `unicorn_core.dart`
 - `unicorn_logger.dart`
+- `unicorn_clock.dart`
 - `unicorn_collection.dart`
 - `unicorn_type.dart`
 - `unicorn_tools/unicorn_search/levenshtein_search.dart`
+
+## Convention de gestion des erreurs
+
+Le toolkit distingue deux cas :
+
+- **Lookup, parse, recherche sans match** : retour souple (`null`, liste vide).
+- **Violation de contrat** (argument invalide, mauvais etat d'une API stateful) :
+  `throw` (`ArgumentError`, `StateError`).
+
+Les modules futurs suivent cette meme logique selon la nature de l'API.
+
+## Chrono (U$Clock)
+
+`U$Clock` est un singleton leger pour mesurer des durees nommees.
+
+### API disponible
+
+- `U$Clock().start(name, {reset = true})`
+- `U$Clock().stop(name)`
+- `U$Clock().getDuration(name)`
+- `U$Clock().show(name)`
+
+### Exemple rapide
+
+```dart
+final clock = U$Clock();
+
+clock.start('import-job');
+// ... votre traitement ...
+clock.stop('import-job');
+
+final elapsed = clock.getDuration('import-job');
+print('Temps ecoule: $elapsed');
+```
+
+### Comportement important
+
+- Chaque `start(name)` demarre une nouvelle mesure pour ce nom (remplace l'instance precedente).
+- `reset: true` (defaut) supprime d'abord l'etat existant du nom avant de demarrer.
+- `start(name, reset: false)` leve une erreur si le chrono tourne deja.
+- `stop(name)` leve une erreur si le chrono n'est pas en cours.
+- `getDuration(name)` et `show(name)` levent une erreur si le chrono tourne encore
+  ou si le nom est inconnu.
+
+`U$Clock` applique la convention **violation de contrat** : une mauvaise sequence
+(`start` → `stop` → lecture) leve un `StateError` plutot que de renvoyer une
+duree silencieusement fausse.
+
+### Erreurs (`StateError`)
+
+| Situation | Message (extrait) |
+|-----------|-------------------|
+| `start(name, reset: false)` alors que le chrono tourne | `already running` |
+| `stop(name)` sans chrono en cours | `not running` |
+| `getDuration` / `show` pendant l'execution | `still running` |
+| `getDuration` / `show` sur un nom inconnu | `not found` |
+
+En usage normal, enchainer `start` → `stop` → `getDuration` ou `show` ; aucun
+`try/catch` n'est necessaire.
 
 ## Recherche Levenshtein
 
