@@ -64,24 +64,25 @@ class U$Clock {
 
 class _U$Stopwatch {
   final String name;
-  final DateTime start;
-  DateTime? end;
+  final Stopwatch _stopwatch = Stopwatch()..start();
+  bool _stopped = false;
 
-  _U$Stopwatch(this.name) : start = DateTime.now();
+  _U$Stopwatch(this.name);
 
   void stop() {
-    end = DateTime.now();
+    _stopwatch.stop();
+    _stopped = true;
   }
 
   Duration get duration {
-    if (end == null) {
+    if (!_stopped) {
       throw StateError('Stopwatch not stopped');
     }
-    return end!.difference(start);
+    return _stopwatch.elapsed;
   }
 
   @override
   String toString() {
-    return '_U\$Stopwatch{name: $name, start: $start, end: $end}';
+    return '_U\$Stopwatch{name: $name, elapsed: ${_stopwatch.elapsed}, stopped: $_stopped}';
   }
 }
