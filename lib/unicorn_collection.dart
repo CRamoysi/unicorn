@@ -32,12 +32,11 @@ extension U$ListRemoveExtensions<T> on List<T> {
     return null;
   }
 
-  void sortBy<K extends Comparable<Object?>>(K Function(T) keyOf) {
+  void sortBy<K extends Comparable<Object?>>(K Function(T) keyOf, {bool descending = false}) {
     if (isEmpty) return;
     sort((a, b) {
-      final keyA = keyOf(a);
-      final keyB = keyOf(b);
-      return keyA.compareTo(keyB);
+      final result = keyOf(a).compareTo(keyOf(b));
+      return descending ? -result : result;
     });
   }
 
@@ -284,6 +283,15 @@ Map<K, List<T>> u$groupBy<T, K>(
     result.putIfAbsent(key, () => <T>[]).add(element);
   }
   return result;
+}
+
+/// Associe les éléments de deux iterables en paires. S'arrête au plus court.
+Iterable<(A, B)> u$zip<A, B>(Iterable<A> a, Iterable<B> b) sync* {
+  final iterA = a.iterator;
+  final iterB = b.iterator;
+  while (iterA.moveNext() && iterB.moveNext()) {
+    yield (iterA.current, iterB.current);
+  }
 }
 
 List<List<T>> u$partition<T>(Iterable<T> iterable, int size) {
