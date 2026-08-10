@@ -45,6 +45,14 @@ void main() {
 			expect(map.getV<int>('count'), 12);
 		});
 
+		test('custom parser overrides an already typed value', () {
+			final map = <String, dynamic>{'count': 12};
+			expect(
+				map.getV<int>('count', {int: (_) => 42}),
+				42,
+			);
+		});
+
 		test('parses common primitive values through tryParse', () {
 			final map = <String, dynamic>{
 				'asInt': '42',
