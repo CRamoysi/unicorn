@@ -77,7 +77,7 @@ T? _tryParseListItem<T>(Object? value, {Map<Type, dynamic>? customCases}) {
       return U$String.tryParse(value) as T;
     case const (DateTime):
       if (value is DateTime) return value as T;
-      if (value is String) return (DateTime.tryParse(value) as T?);
+      if (value is String) return (DateTime.tryParse(value) as T?) ?? fallback(value);
       return fallback(value);
     case const (bool):
       return (U$Bool.tryParse(value) as T?) ?? fallback(value);

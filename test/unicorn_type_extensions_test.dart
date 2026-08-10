@@ -29,6 +29,13 @@ void main() {
         U$List.tryParse<int>([42], customCases: {int: (_) => 7}),
         [7],
       );
+      expect(
+        U$List.tryParse<DateTime>(
+          ['invalid'],
+          customCases: {Object: (_) => DateTime(2024)},
+        ),
+        [DateTime(2024)],
+      );
     });
   });
 
