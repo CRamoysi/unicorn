@@ -30,7 +30,8 @@ L'import principal expose:
 
 Le toolkit distingue deux cas :
 
-- **Lookup, parse, recherche sans match** : retour souple (`null`, liste vide).
+- **Lookup, tryParse, recherche sans match** : retour souple (`null`, liste vide).
+- **Parse strict** : conversion invalide signalée par une `FormatException`.
 - **Violation de contrat** (argument invalide, mauvais etat d'une API stateful) :
   `throw` (`ArgumentError`, `StateError`).
 
