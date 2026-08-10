@@ -36,6 +36,75 @@ Le toolkit distingue deux cas :
 
 Les modules futurs suivent cette meme logique selon la nature de l'API.
 
+## Typage et parsing
+
+Les extensions de typage sont exportees par `package:unicorn/unicorn.dart`.
+Le point d'entree generique est `tryParse<T>()` :
+
+```dart
+final count = '42'.tryParse<int>();
+final enabled = 'true'.tryParse<bool>();
+final date = '2024-01-01'.tryParse<DateTime>();
+final values = rawValues.tryParseList<int>();
+```
+
+Les types natifs pris en charge sont :
+
+| Type cible | Regle de conversion |
+|------------|---------------------|
+| `int` | Entier, nombre tronque, ou chaîne numérique |
+| `double` | Nombre décimal, ou chaîne numérique |
+| `String` | Conversion via `toString()` |
+| `DateTime` | Instance existante ou chaîne ISO-8601 |
+| `bool` | `true`, `1`, `"true"` et `"1"` donnent `true`; `false`, `0`, `"false"` et `"0"` donnent `false`; une valeur invalide donne `null` |
+
+Chaque type dispose également d'un parseur statique :
+
+```dart
+U$Int.tryParse('42');
+U$Double.tryParse('3.14');
+U$String.tryParse(42);
+U$List.tryParse<String>([' a ', '', 'b']);
+U$DateTime.tryParse('2024-01-01');
+U$Bool.tryParse('true');
+U$Bool.parse('valeur-invalide'); // lève FormatException
+```
+
+`U$List.tryParse<T>()` parse chaque élément vers `T` et ignore les éléments
+nulls ou impossibles à convertir. L'extension `tryParseList<T>()` permet de
+l'utiliser directement sur une valeur :
+
+```dart
+final values = rawValues.tryParseList<int>();
+```
+
+Le parsing ne trim pas automatiquement les chaînes ; utilisez `cleanAndTrim`
+pour ce besoin.
+
+Les méthodes `parse` sont strictes et lèvent une `FormatException` si la
+conversion échoue. Les méthodes `tryParse` sont tolérantes et retournent
+`null`.
+
+Pour les booléens, `U$Bool.tryParse()` retourne `null` si la valeur est
+invalide. `U$Bool.parse()` applique la même conversion et lève une
+`FormatException` dans ce cas.
+
+Pour les types non natifs, utilisez `customCases`. La clé peut être le type
+runtime exact de la valeur source, `Null` pour une valeur absente ou `Object`
+comme fallback final :
+
+Un `customCase` associé au type runtime exact est prioritaire, y compris si la
+valeur est déjà du type cible. Il peut donc surcharger un parseur natif.
+
+```dart
+final value = raw.tryParse<MyType>(
+  customCases: {
+    String: (raw) => MyType.fromString(raw as String),
+    Object: (_) => MyType.defaultValue(),
+  },
+);
+```
+
 ## Chrono (U$Clock)
 
 `U$Clock` est un singleton leger pour mesurer des durees nommees.

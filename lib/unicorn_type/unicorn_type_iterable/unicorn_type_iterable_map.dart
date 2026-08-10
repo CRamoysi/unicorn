@@ -13,10 +13,6 @@ extension UnicornMapExtension<K, V> on Map<K, V>? {
     }
 
     final value = this![key];
-    if (value is T) {
-      return value;
-    }
-
     return value.tryParse<T>(
       customCases: customCases,
     );
